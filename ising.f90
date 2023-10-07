@@ -2,11 +2,11 @@ program ising_mc
     use ziggurat
     implicit none
     logical :: es1,es2,es3,es4
-    integer :: seed,steps,i,x,y
+    integer :: seed,steps,i,x,y,ii,jj
     integer,parameter :: n=20,m=20
-    real(kind=8),parameter :: kb = 8.6173303**(-5)
-    real(kind=8) :: sistema_mu(n,m),sistema_v(n,m)
-    real(kind=8) :: b,T,deltaE
+    real(kind=8),parameter :: kb = 1
+    real(kind=8) :: sistema_mu(n,m)
+    real(kind=8) :: b,T,deltaE, Emed, Enu, Emu, Jis,r
 ![NO TOCAR] Inicializa generador de número random
 !------------------------------------------------------------------------------------------------------------
 
@@ -51,6 +51,12 @@ program ising_mc
     else
         T = 1
     end if
+! -------------------------------------------------------------------------------------------------------
+! Doy valor a Jis, constante J para el cálculo de la energía
+
+Jis = 1
+
+!.........................................................................................................
 !------------------------------------------------------------------------------------------------------------
 ! 1°paso: Inicializo una matriz de nxm que representa nuestro sistema
 !------------------------------------------------------------------------------------------------------------
@@ -62,30 +68,62 @@ program ising_mc
         open(unit=40,file='matriz.dat',status='old')
         read(40,*) sistema_mu
         close(40)
-        print *,"  * Leyendo matriz inicial de archivo matriz.dat"
+        print *,"  * Buscando matriz inicial de archivo"
     else
         call init_system(n, m, sistema_mu)
         print *, "  * Archivo matriz.dat no encontrado. Inicializando.."
     end if
     print *, "  * Sistema de 20x20 inicializado "
-    
-    sistema_v=sistema_mu
+
  !-----------------------------------------------------------------------------------------------------------
  ! 2° paso: Hago el loop de MonteCarlo
- !----------------------------------------------------------------------------------------------------------- 
+ !-----------------------------------------------------------------------------------------------------------
+
+!. Calculo la energía inicial del sistema    
+    call initial_energy(sistema_mu,n,m,Jis,Emed)    
+    print *, "  * Energía inicial:", Emed
+
+ 
+!.Archivo para ir guardando la energía
+    open(unit=50, file='energy.dat',status='unknown')
+    !.Loop de montecarlo
     do i = 1, steps
     !.Selecciono una fila y una columna al azar
-       x = nint(uni()*m)
-       y = nint(uni()*n)
+        x = nint(uni()*(n-1))+1
+        y = nint(uni()*(m-1))+1
        !.Planteo el spinflip       
-       sistema_v(x,y)=-1*sistema_mu(x,y) 
        !.Acá viene el calculo de diferencia de energias (me falta hacer la subrutina)
-        call delta_energy(sistema_mu,x,y,n,m,1,deltaE)
-        print *, deltaE
-    end do
-
-
-
+        call delta_energy(sistema_mu,x,y,n,m,Jis,deltaE)
+        !.Evaluo si acepto o no el nuevo estado
+        !.Si la energía del nuevo estado es menor, la acepto:
+        if (deltaE <=0) then
+                ! Hago efectivo el spin flip
+                sistema_mu(x,y)=-1*sistema_mu(x,y) 
+        else
+                r = uni()
+                if (r<exp(-deltaE/(kb*T))) then
+                        sistema_mu(x,y) = -1*sistema_mu(x,y)
+                else
+                        deltaE=0
+                end if
+        end if
+        !. Calculo la energía del sistema
+        Emed = Emed + deltaE
+        !.Escribo a archivo la energia cada 1000 pasos
+        if (MOD(steps,1000) == 0) then
+                write(50,*) i,",",Emed
+        end if
+     end do
+     print *, "  * Fin de MC Loop"
+     print *, "  * Cerrando archivo energia.dat"
+      !.Cierro archivo de energia  
+      close(50)
+      !.Guardo la matriz final
+      print *, "  * Escribiendo matriz final del sistema"
+      open(unit=60,file='matriz.dat',status='unknown')
+      write(60,*) sistema_mu
+      close(60)
+      print *, "  * Corrida finalizada"
 !! 
 !! EDITAR AQUI 
 !! 
