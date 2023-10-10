@@ -6,7 +6,7 @@ program ising_mc
     integer,parameter :: n=20,m=20
     real(kind=8),parameter :: kb = 1
     real(kind=8) :: sistema_mu(n,m)
-    real(kind=8) :: b,T,deltaE, Emed, Enu, Emu, Jis,r
+    real(kind=8) :: b,T,deltaE, Emed, Enu, Emu, Jis,r, Mmed
 ![NO TOCAR] Inicializa generador de número random
 !------------------------------------------------------------------------------------------------------------
 
@@ -83,6 +83,9 @@ Jis = 1
     call initial_energy(sistema_mu,n,m,Jis,Emed)    
     print *, "  * Energía inicial:", Emed
 
+!. Calculo la magnetización inicial del sistema
+    call initial_magnetization(sistema_mu, n, m, Jis, Mmed)
+    print *, " * Magnetización incial:", Mmed
  
 !.Archivo para ir guardando la energía
     open(unit=50, file='energy.dat',status='unknown')
@@ -118,6 +121,8 @@ Jis = 1
      print *, "  * Cerrando archivo energia.dat"
       !.Cierro archivo de energia  
       close(50)
+
+      
       !.Guardo la matriz final
       print *, "  * Escribiendo matriz final del sistema"
       open(unit=60,file='matriz.dat',status='unknown')
