@@ -89,6 +89,8 @@ Jis = 1
  
 !.Archivo para ir guardando la energía
     open(unit=50, file='energy.dat',status='unknown')
+!. Archivo para ir guardando la magnetización
+    open(unit=70, file='magnetizacion.dat', status='unknown')
     !.Loop de montecarlo
     do i = 1, steps
     !.Selecciono una fila y una columna al azar
@@ -112,15 +114,23 @@ Jis = 1
         end if
         !. Calculo la energía del sistema
         Emed = Emed + deltaE
-        !.Escribo a archivo la energia cada 1000 pasos
+        
+        !. Calculo la magnetización del sistema
+        Mmed = Mmed + 2*sistema_mu(x,y) !Sistema_mu ya es el nuevo sistema 
+        
+        !.Escribo a archivo la energia y la magnetización cada 1000 pasos
         if (MOD(steps,1000) == 0) then
                 write(50,*) i,",",Emed
+                write(70,*) i, ", ", Mmed
         end if
+
+
      end do
      print *, "  * Fin de MC Loop"
-     print *, "  * Cerrando archivo energia.dat"
-      !.Cierro archivo de energia  
+     print *, "  * Cerrando archivo energia.dat y magnetizacion.dat"
+      !.Cierro archivos de energia y magnetización  
       close(50)
+      close(70)
 
       
       !.Guardo la matriz final
