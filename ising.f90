@@ -6,7 +6,7 @@ program ising_mc
     integer,parameter :: n=20,m=20
     real(kind=8),parameter :: kb = 1
     real(kind=8) :: sistema_mu(n,m)
-    real(kind=8) :: b,T,deltaE, Emed, Enu, Emu, Jis,r, Mmed
+    real(kind=8) :: b,T,deltaE,deltaM, Emed, Enu, Emu, Jis,r, Mmed
 ![NO TOCAR] Inicializa generador de número random
 !------------------------------------------------------------------------------------------------------------
 
@@ -103,20 +103,24 @@ Jis = 1
         !.Si la energía del nuevo estado es menor, la acepto:
         if (deltaE <=0) then
                 ! Hago efectivo el spin flip
-                sistema_mu(x,y)=-1*sistema_mu(x,y) 
+                sistema_mu(x,y)=-1*sistema_mu(x,y)
+                ! Calculo la diferencia de magnetización
+                deltaM = sistema_mu(x,y)*2
         else
                 r = uni()
                 if (r<exp(-deltaE/(kb*T))) then
                         sistema_mu(x,y) = -1*sistema_mu(x,y)
+                        deltaM=sistema_mu(x,y)*2
                 else
                         deltaE=0
+                        deltaM=0
                 end if
         end if
         !. Calculo la energía del sistema
         Emed = Emed + deltaE
         
         !. Calculo la magnetización del sistema
-        Mmed = Mmed + 2*sistema_mu(x,y) !Sistema_mu ya es el nuevo sistema 
+        Mmed = Mmed + deltaM 
         
         !.Escribo a archivo la energia y la magnetización cada 1000 pasos
         if (MOD(steps,1000) == 0) then

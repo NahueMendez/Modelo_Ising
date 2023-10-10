@@ -1,11 +1,11 @@
-subroutine initial_energy(sistema,Jis,n,m,E)
+subroutine initial_magnetization(sistema,n,m,Magnet)
     implicit none
     integer, intent(in) :: n, m
-    real(kind=8), intent(in) :: Jis, sistema(n,m)
+    real(kind=8), intent(in) :: sistema(n,m)
     integer :: sigx, sigy, antx, anty, ii,jj
-    real(kind=8),intent(out) :: E
-    !.Inicializo la variable E
-    E = 0 
+    real(kind=8),intent(out) :: Magnet
+    !.Inicializo la variable Magnet
+    Magnet = 0 
     !.Sumo a lo largo de la matriz considerando condiciones periodicas de contorno
     do ii=1,m
        do jj=1, n
@@ -24,7 +24,7 @@ subroutine initial_energy(sistema,Jis,n,m,E)
                sigy = jj+1
                anty = jj-1  
         end if
-        E = E + (-Jis*sistema(ii,jj)*(sistema(antx,jj)+sistema(sigx,jj)+sistema(ii,anty)+sistema(ii,sigy)))
+        Magnet = Magnet + sistema(ii,jj)
        end do  
     end do
-end subroutine initial_energy
+end subroutine initial_magnetization
