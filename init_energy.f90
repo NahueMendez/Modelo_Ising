@@ -2,29 +2,25 @@ subroutine initial_energy(sistema,Jis,n,m,E)
     implicit none
     integer, intent(in) :: n, m
     real(kind=8), intent(in) :: Jis, sistema(n,m)
-    integer :: sigx, sigy, antx, anty, ii,jj
+    real(kind=8), allocatable :: sistema_aug(:,:)
     real(kind=8),intent(out) :: E
+    integer :: ii,jj
+    ! Aloco la matriz aumentada
+    allocate(sistema_aug(0:n+1,0:m+1))
+    !Repito filas y columnas (PVC)
+    sistema_aug(1:n,1:m)=sistema
+    sistema_aug(0,:)=sistema(n,:)
+    sistema_aug(n+1,:)=sistema(1,:)
+    sistema_aug(:,0)=sistema(:,m)
+    sistema_aug(:,m+1)=sistema(:,1)
+
     !.Inicializo la variable E
     E = 0 
     !.Sumo a lo largo de la matriz considerando condiciones periodicas de contorno
     do ii=1,m
        do jj=1, n
 
-       if (ii ==1) then
-               antx=n
-       else if (jj==1) then
-               anty=m
-       else if (ii==n) then
-               sigx=1
-       else if (jj==m) then
-               sigy=1
-       else
-               sigx = ii+1
-               antx = ii-1
-               sigy = jj+1
-               anty = jj-1  
-        end if
-        E = E + (-Jis*sistema(ii,jj)*(sistema(antx,jj)+sistema(sigx,jj)+sistema(ii,anty)+sistema(ii,sigy)))
+        E = E + (-Jis*sistema_aug(ii,jj)*(sistema_aug(ii-1,jj)+sistema_aug(ii+1,jj)+sistema_aug(ii,jj-1)+sistema_aug(ii,jj+1)))
        end do  
     end do
 end subroutine initial_energy

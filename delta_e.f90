@@ -5,26 +5,19 @@ subroutine delta_energy(sistema, x, y, n, m, Jis,delta)
     integer, intent(in) :: n, m   ! Tamaño de la matriz 
     real(kind=8), intent(out) :: delta  ! Salida de la rutina Delta Energia
     real(kind=8), intent(in) :: sistema(n, m) !Entrada: matriz del sistema
-    integer :: sigx,sigy,antx,anty  !. Enteros a utilizar
-
-    !.Introduzco las condiciones periódicas de contorno
-    if (x==1) then
-            antx = n
-    else if (y==1) then
-            anty = m
-    else if (x==n) then
-            sigx = 1
-    else if (y==m) then
-            sigy = 1
-    else
-           sigx = x+1
-           antx = x-1
-           sigy = y+1
-           anty = y-1
-    end if
+    real(kind=8),allocatable :: sistema_aug(:,:) !. Matriz aumentada con PVC
+    
+    !.Aloco una matriz de n+1 y m+1
+    allocate(sistema_aug(0:n+1,0:m+1))
+    sistema_aug(1:n,1:m)=sistema
+    !.Repito filas y columnas (condiciones periodicas de contorno PVC)
+    sistema_aug(0,:)=sistema(n,:)
+    sistema_aug(n+1,:)=sistema(1,:)
+    sistema_aug(:,0)=sistema(:,m)
+    sistema_aug(:,m+1)=sistema(:,1)
 
     ! Calcular deltaE
-    delta=2.0*Jis*sistema(x,y)*(sistema(antx,y)+sistema(sigx,y)+sistema(x,anty)+sistema(x,sigy))
+    delta=2.0*Jis*sistema(x,y)*(sistema(x-1,y)+sistema(x+1,y)+sistema(x,y-1)+sistema(x,y+1))
 
 end subroutine delta_energy
 
