@@ -6,7 +6,7 @@ program ising_mc
     integer,parameter :: n=20,m=20
     real(kind=8),parameter :: kb = 1
     real(kind=8) :: sistema_mu(n,m)
-    real(kind=8) :: b,T,deltaE,deltaM, Emed, Enu, Emu, Jis,r, Mmed, Emed_2, Mmed_2
+    real(kind=8) :: b,T,deltaE,deltaM, Emed, Enu, Emu, Jis,r, Mmed, Emed_2, Mmed_2, cv, sus
 ![NO TOCAR] Inicializa generador de número random
 !------------------------------------------------------------------------------------------------------------
 
