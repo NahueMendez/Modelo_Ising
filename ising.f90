@@ -6,7 +6,7 @@ program ising_mc
     integer,parameter :: n=20,m=20
     real(kind=8),parameter :: kb = 1
     real(kind=8) :: sistema_mu(n,m)
-    real(kind=8) :: b,T,deltaE,deltaM, Emed, Enu, Emu, Jis,r, Mmed
+    real(kind=8) :: b,T,deltaE,deltaM, Emed, Enu, Emu, Jis,r, Mmed, Emed_2, Mmed_2
 ![NO TOCAR] Inicializa generador de número random
 !------------------------------------------------------------------------------------------------------------
 
@@ -86,11 +86,19 @@ Jis = 1
 !. Calculo la magnetización inicial del sistema
     call initial_magnetization(sistema_mu, n, m, Jis, Mmed)
     print *, " * Magnetización incial:", Mmed
- 
+
+!. Inicializo en cero la energía y magnetización cuadráticas medias
+    Emed_2 = 0
+    Mmed_2 = 0
+
 !.Archivo para ir guardando la energía
     open(unit=50, file='energy.dat',status='unknown')
 !. Archivo para ir guardando la magnetización
     open(unit=70, file='magnetizacion.dat', status='unknown')
+!. Archivo para ir guardando el calor específico
+    open(unit=80, file='calor_especifico.dat', status='unknown')
+!. Archivo para ir guardando la susceptibilidad magnética
+    open(unit=90, file='susceptibilidad.dat', status='unknown')
     !.Loop de montecarlo
     do i = 1, steps
     !.Selecciono una fila y una columna al azar
@@ -118,23 +126,38 @@ Jis = 1
         end if
         !. Calculo la energía del sistema
         Emed = Emed + deltaE
+
+        !. Calculo la energía cuadrática media del sistema
+        Emed_2 = Emed_2 + delta_E**2
         
         !. Calculo la magnetización del sistema
         Mmed = Mmed + deltaM 
-        
+
+        !. Calculo la magnetización cuadrática media del sistema
+        Mmed_2 = Mmed_2 + deltaM**2
+
+        !. Calculo el calor específico
+        cv = 1/(kb*T**2*m*n)*(Emed_2/(steps/1000) - (Emed**2)/(steps/1000))
+
+        !. Calculo la susceptibilidad
+        sus = m*n/(kb*T)*(Emed_2/(steps/1000) - (Mmed**2)/(steps/1000)
         !.Escribo a archivo la energia y la magnetización cada 1000 pasos
         if (MOD(steps,1000) == 0) then
-                write(50,*) i,",",Emed
-                write(70,*) i, ", ", Mmed
+                write(50,*) i,",",Emed/(steps/1000)
+                write(70,*) i, ", ", Mmed/(steps/1000)
+                write(80, *) i, ", ", cv
+                write(90, *) i, ", ", sus
         end if
 
 
      end do
      print *, "  * Fin de MC Loop"
-     print *, "  * Cerrando archivo energia.dat y magnetizacion.dat"
-      !.Cierro archivos de energia y magnetización  
+     print *, "  * Cerrando archivo energia.dat, magnetizacion.dat, calor_especifico.dat, susceptibilidad.dat"
+      !.Cierro archivos de energia, magnetización, calor específico y susceptibilidad  
       close(50)
       close(70)
+      close(80)
+      close(90)
 
       
       !.Guardo la matriz final
