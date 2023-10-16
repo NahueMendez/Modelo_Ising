@@ -140,7 +140,7 @@ Jis = 1
         cv = 1/(kb*T**2*m*n)*(Emed_2/real(steps) - (Emed**2)/real(steps))
 
         !. Calculo la susceptibilidad
-        sus = m*n/(kb*T)*(Emed_2/real(steps) - (Mmed**2))/real(steps)
+        sus = m*n/(kb*T)*(Emed_2/real(steps) - (Mmed**2)/real(steps))
         !.Escribo a archivo la energia y la magnetización cada 1000 pasos
         if (MOD(steps,1000) == 0) then
                 write(50,*) i,",",Emed/real(steps)
