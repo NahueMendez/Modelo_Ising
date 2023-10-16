@@ -15,7 +15,9 @@ do
     		echo "Modificando T.dat con temperatura: $temp"
     		echo "$temp" > T.dat
     		echo "Ejecutando $ejecutable con temperatura: $temp"
-    		$ejecutable
+    		#.Elimino matriz.dat asi inicializa aleatoriamente
+		[ -e ./matriz.dat ] && rm ./matriz.dat
+		$ejecutable
 
      	# Renombra el archivo energy.dat a energy_$temp.dat
     		mv ./energy.dat "./resultados/$i-energy-$temp.dat"
