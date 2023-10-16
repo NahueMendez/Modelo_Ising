@@ -137,14 +137,14 @@ Jis = 1
         Mmed_2 = Mmed_2 + deltaM**2
 
         !. Calculo el calor específico
-        cv = 1/(kb*T**2*m*n)*(Emed_2/real(steps/1000) - (Emed**2)/real(steps/1000))
+        cv = 1/(kb*T**2*m*n)*(Emed_2/real(steps) - (Emed**2)/real(steps))
 
         !. Calculo la susceptibilidad
-        sus = m*n/(kb*T)*(Emed_2/real(steps/1000) - (Mmed**2))/real(steps/1000)
+        sus = m*n/(kb*T)*(Emed_2/real(steps) - (Mmed**2))/real(steps)
         !.Escribo a archivo la energia y la magnetización cada 1000 pasos
         if (MOD(steps,1000) == 0) then
-                write(50,*) i,",",Emed/real(steps/1000)
-                write(70,*) i, ", ", Mmed/real(steps/1000)
+                write(50,*) i,",",Emed/real(steps)
+                write(70,*) i, ", ", Mmed/real(steps)
                 write(80, *) i, ", ", cv
                 write(90, *) i, ", ", sus
         end if
