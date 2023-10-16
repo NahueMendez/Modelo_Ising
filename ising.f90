@@ -128,7 +128,7 @@ Jis = 1
         Emed = Emed + deltaE
 
         !. Calculo la energía cuadrática media del sistema
-        Emed_2 = Emed_2 + delta_E**2
+        Emed_2 = Emed_2 + deltaE**2
         
         !. Calculo la magnetización del sistema
         Mmed = Mmed + deltaM 
@@ -140,7 +140,7 @@ Jis = 1
         cv = 1/(kb*T**2*m*n)*(Emed_2/(steps/1000) - (Emed**2)/(steps/1000))
 
         !. Calculo la susceptibilidad
-        sus = m*n/(kb*T)*(Emed_2/(steps/1000) - (Mmed**2)/(steps/1000)
+        sus = m*n/(kb*T)*(Emed_2/(steps/1000) - (Mmed**2))/(steps/1000)
         !.Escribo a archivo la energia y la magnetización cada 1000 pasos
         if (MOD(steps,1000) == 0) then
                 write(50,*) i,",",Emed/(steps/1000)
