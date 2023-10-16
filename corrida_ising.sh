@@ -21,5 +21,11 @@ do
     		mv ./energy.dat "./resultados/$i-energy-$temp.dat"
      	# Renombra el archivo magnetizacion.dat a magnetizacion_$temp.dat
     		mv ./magnetizacion.dat "./resultados/$i-magnetizacion_$temp.dat"
+
+     	# Renombra el archivo calor_especifico.dat a calor_especifico_$temp.dat
+    		mv ./calor_especifico.dat "./resultados/$i-calor_especifico_$temp.dat"
+
+     	# Renombra el archivo susceptibilidad.dat a susceptibilidad_$temp.dat
+    		mv ./susceptibilidad.dat "./resultados/$i-susceptibilidad_$temp.dat"
 	done
 done
