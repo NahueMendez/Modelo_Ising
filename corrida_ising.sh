@@ -13,21 +13,28 @@ do
 	for i in {1..4}
 	do
     		echo "Modificando T.dat con temperatura: $temp"
-    		echo "$temp" > T.dat
+    		echo "$temp" > temp.dat
     		echo "Ejecutando $ejecutable con temperatura: $temp"
     		#.Elimino matriz.dat asi inicializa aleatoriamente
-		[ -e ./matriz.dat ] && rm ./matriz.dat
+		#[ -e ./matriz.dat ] && rm ./matriz.dat
 		$ejecutable
 
-     	# Renombra el archivo energy.dat a energy_$temp.dat
-    		mv ./energy.dat "./resultados/$i-energy-$temp.dat"
-     	# Renombra el archivo magnetizacion.dat a magnetizacion_$temp.dat
-    		mv ./magnetizacion.dat "./resultados/$i-magnetizacion_$temp.dat"
+     	# Renombra el archivo de energía media
+    		mv ./E.dat "./resultados/$i-E-$temp.dat"
 
-     	# Renombra el archivo calor_especifico.dat a calor_especifico_$temp.dat
-    		mv ./calor_especifico.dat "./resultados/$i-calor_especifico_$temp.dat"
+     	# Renombra el archivo magnetizacion media
+    		mv ./Mag.dat "./resultados/$i-Mag_$temp.dat"
 
-     	# Renombra el archivo susceptibilidad.dat a susceptibilidad_$temp.dat
-    		mv ./susceptibilidad.dat "./resultados/$i-susceptibilidad_$temp.dat"
+     	# Renombra el archivo de energia cuadratica media
+    		mv ./E2.dat "./resultados/$i-E2_$temp.dat"
+
+     	# Renombra el archivo de magnetizacion cuadratica media
+    		mv ./Mag2.dat "./resultados/$i-Mag2_$temp.dat"
+
+     	# Renombra el archivo calor especifico
+    		mv ./CV.dat "./resultados/$i-CV_$temp.dat"
+
+     	# Renombra el archivo susceptibilidad
+    		mv ./chi.dat "./resultados/$i-chi_$temp.dat"
 	done
 done

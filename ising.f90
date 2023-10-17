@@ -1,23 +1,26 @@
 program ising_mc 
     use ziggurat
     implicit none
-    logical :: es1,es2,es3,es4
-    integer :: seed,steps,i,x,y,ii,jj
+    logical :: es1,es2,es3
+    integer :: seed,steps,i,x,y,ii,jj,j
     integer,parameter :: n=20,m=20
-    real(kind=8),parameter :: kb = 1
+    real(kind=8),parameter :: kb = 1.0
     real(kind=8) :: sistema_mu(n,m)
-    real(kind=8) :: b,T,deltaE,deltaM, Emed, Enu, Emu, Jis,r, Mmed, Emed_2, Mmed_2, cv, sus
+    real(kind=8) :: b,T,deltaE,deltaM, Emed, E, Mag, Jis,r, Mmed, Emed_2, Mmed_2, cv, sus
 ![NO TOCAR] Inicializa generador de número random
 !------------------------------------------------------------------------------------------------------------
 
-    inquire(file='seed.dat',exist=es1)
+    inquire(file='input.dat',exist=es1)
     if(es1) then
-        open(unit=10,file='seed.dat',status='old')
+        open(unit=10,file='input.dat',status='old')
         read(10,*) seed
+        read(10,*) steps 
         close(10)
-        print *,"  * Leyendo semilla de archivo seed.dat"
+        print *,"  * Leyendo semilla y N° pasos de archivo input.dat"
     else
+        print *, " * Archivo de input no encontrado. Valores por defecto.."
         seed = 24583490
+        steps = 10000
     end if
 
     call zigset(seed)
@@ -27,34 +30,21 @@ program ising_mc
 !------------------------------------------------------------------------------------------------------------
 ! Leo el número de pasos de MC de un archivo externo
 !------------------------------------------------------------------------------------------------------------
-
-    inquire(file='steps.dat',exist=es2)
-    if(es2) then
-        open(unit=20,file='steps.dat',status='old')
-        read(20,*) steps
-        close(20)
-        print *,"  * Leyendo número de pasos de steps.dat"
-    else
-        steps = 2000
-        print *,"  * Archivo steps.dat no encontrado. Por defecto se toman 2000 pasos."
-    end if
-    
-    print *,"  * Número de pasos:", steps
 !..........................................................................................................   
    
-    inquire(file='temp.dat',exist=es3)
-    if(es3) then
+    inquire(file='temp.dat',exist=es2)
+    if(es2) then
         open(unit=30,file='temp.dat',status='old')
         read(30,*) T
         close(30)
         print *,"  * Leyendo temperatura de archivo temp.dat"
     else
-        T = 1
+        T = 1.0
     end if
 ! -------------------------------------------------------------------------------------------------------
 ! Doy valor a Jis, constante J para el cálculo de la energía
 
-Jis = 1
+Jis = 1.0
 
 !.........................................................................................................
 !------------------------------------------------------------------------------------------------------------
@@ -63,10 +53,13 @@ Jis = 1
 ! Llamo a la subrutina para inicializar my_system
     call init_system(n, m, sistema_mu)
     
-    inquire(file='matriz.dat',exist=es4)
-    if(es4) then
+    inquire(file='matriz.dat',exist=es3)
+    if(es3) then
         open(unit=40,file='matriz.dat',status='old')
-        read(40,*) sistema_mu
+        ! Lee la matriz desde el archivo
+        do i = 1, n
+                read(40, *) (sistema_mu(i, j), j = 1, m)
+        end do
         close(40)
         print *,"  * Buscando matriz inicial de archivo"
     else
@@ -80,30 +73,38 @@ Jis = 1
  !-----------------------------------------------------------------------------------------------------------
 
 !. Calculo la energía inicial del sistema    
-    call initial_energy(sistema_mu,n,m,Jis,Emed)    
-    print *, "  * Energía inicial:", Emed
+    call initial_energy(sistema_mu,Jis,n,m,E)    
+    print *, "  * Energía inicial:", E
 
 !. Calculo la magnetización inicial del sistema
-    call initial_magnetization(sistema_mu, n, m, Jis, Mmed)
-    print *, " * Magnetización incial:", Mmed
+    call initial_magnetization(sistema_mu, n, m, Jis, Mag)
+    print *, "  * Magnetización incial:", Mag
+    
 
-!. Inicializo en cero la energía y magnetización cuadráticas medias
+!. Inicializo en cero los acumuladores de energía y magnetización y sus cuadráticas medias
+    Emed = 0
+    Mmed = 0
     Emed_2 = 0
     Mmed_2 = 0
 
+
 !.Archivo para ir guardando la energía
-    open(unit=50, file='energy.dat',status='unknown')
+    open(unit=50, file='E.dat',status='unknown')
 !. Archivo para ir guardando la magnetización
-    open(unit=70, file='magnetizacion.dat', status='unknown')
+    open(unit=70, file='Mag.dat', status='unknown')
+!. Archivo para ir guardando la energia cuadratica media
+    open(unit=80, file='E2.dat',status='unknown')
+!. Archivo para ir guardando la magnetización cuadratica media
+    open(unit=90, file='Mag2.dat', status='unknown')
 !. Archivo para ir guardando el calor específico
-    open(unit=80, file='calor_especifico.dat', status='unknown')
+    open(unit=100, file='CV.dat', status='unknown')
 !. Archivo para ir guardando la susceptibilidad magnética
-    open(unit=90, file='susceptibilidad.dat', status='unknown')
+    open(unit=110, file='chi.dat', status='unknown')
     !.Loop de montecarlo
     do i = 1, steps
     !.Selecciono una fila y una columna al azar
-        x = nint(uni()*(n-1))+1
-        y = nint(uni()*(m-1))+1
+        x = int(uni()*(n-1))+1
+        y = int(uni()*(m-1))+1
        !.Planteo el spinflip       
        !.Acá viene el calculo de diferencia de energias (me falta hacer la subrutina)
         call delta_energy(sistema_mu,x,y,n,m,Jis,deltaE)
@@ -114,39 +115,44 @@ Jis = 1
                 sistema_mu(x,y)=-1*sistema_mu(x,y)
                 ! Calculo la diferencia de magnetización
                 deltaM = sistema_mu(x,y)*2
+                !.Calculo energía y magnetización
+                E = E+deltaE
+                Mag = Mag +deltaM
         else
                 r = uni()
                 if (r<exp(-deltaE/(kb*T))) then
                         sistema_mu(x,y) = -1*sistema_mu(x,y)
                         deltaM=sistema_mu(x,y)*2
-                else
-                        deltaE=0
-                        deltaM=0
+                        !.Calculo energía y magnetizacion del sistema
+                        E = E + deltaE
+                        Mag = Mag + deltaM        
                 end if
         end if
         !. Calculo la energía del sistema
-        Emed = Emed + deltaE
+        Emed = Emed + E
 
         !. Calculo la energía cuadrática media del sistema
-        Emed_2 = Emed_2 + deltaE**2
+        Emed_2 = Emed_2 + E**2
         
         !. Calculo la magnetización del sistema
-        Mmed = Mmed + deltaM 
+        Mmed = Mmed + Mag
 
         !. Calculo la magnetización cuadrática media del sistema
-        Mmed_2 = Mmed_2 + deltaM**2
+        Mmed_2 = Mmed_2 + Mag**2
 
         !. Calculo el calor específico
-        cv = 1/(kb*T**2*m*n)*(Emed_2/real(steps) - (Emed**2)/real(steps))
+        cv = 1/(kb**2*T**2*m*n)*(Emed_2/real(i) - (Emed/real(i))**2)
 
         !. Calculo la susceptibilidad
-        sus = m*n/(kb*T)*(Emed_2/real(steps) - (Mmed**2)/real(steps))
+        sus = 1/(kb*T)*(Mmed_2/real(i) - (Mmed/real(i)**2))
         !.Escribo a archivo la energia y la magnetización cada 1000 pasos
         if (MOD(steps,1000) == 0) then
-                write(50,*) i,",",Emed/real(steps)
-                write(70,*) i, ", ", Mmed/real(steps)
-                write(80, *) i, ", ", cv
-                write(90, *) i, ", ", sus
+                write(50,*) i,",",Emed/real(i)
+                write(70,*) i, ", ", Mmed/real(i)
+                write(80, *) i, ", ", Emed_2/real(i)
+                write(90, *) i, ", ", Mmed_2/real(i)
+                write(100,*) i, ", ", cv
+                write(110,*) i, ", ", sus
         end if
 
 
@@ -163,7 +169,11 @@ Jis = 1
       !.Guardo la matriz final
       print *, "  * Escribiendo matriz final del sistema"
       open(unit=60,file='matriz.dat',status='unknown')
-      write(60,*) sistema_mu
+      ! Escribe la matriz en el archivo
+        do i = 1, n
+                write(60, '(4F12.4)') (sistema_mu(i, j), j = 1, m)
+        end do
+
       close(60)
       print *, "  * Corrida finalizada"
 !! 

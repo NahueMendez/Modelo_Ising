@@ -13,9 +13,9 @@ subroutine init_system(n,m,initial_system)
         do i=1,n
            do j=1,m
                  if (uni()>0.5) then
-                         initial_system(i,j)=1
+                         initial_system(i,j)=1.0
                  else
-                         initial_system(i,j)=-1
+                         initial_system(i,j)=-1.0
                 end if
            end do
        end do

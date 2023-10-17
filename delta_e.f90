@@ -17,7 +17,7 @@ subroutine delta_energy(sistema, x, y, n, m, Jis,delta)
     sistema_aug(:,m+1)=sistema(:,1)
 
     ! Calcular deltaE
-    delta=2.0*Jis*sistema(x,y)*(sistema(x-1,y)+sistema(x+1,y)+sistema(x,y-1)+sistema(x,y+1))
+    delta=2.0*Jis*sistema_aug(x,y)*(sistema_aug(x-1,y)+sistema_aug(x+1,y)+sistema_aug(x,y-1)+sistema_aug(x,y+1))
 
 end subroutine delta_energy
 
