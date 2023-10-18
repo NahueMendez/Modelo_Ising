@@ -77,7 +77,7 @@ Jis = 1.0
     print *, "  * Energía inicial:", E
 
 !. Calculo la magnetización inicial del sistema
-    call initial_magnetization(sistema_mu, n, m, Jis, Mag)
+    call initial_magnetization(sistema_mu, n, m, Mag)
     print *, "  * Magnetización incial:", Mag
     
 
