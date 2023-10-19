@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Valores de temperatura
-temperaturas=(0.5 0.8 1 1.5 2 2.1 2.2 2.3 2.4 2.5 3 4 5)
-
+temperaturas=(0.5 0.65 0.8 1 1.5 1.6 1.7 1.8 1.9 2 2.1 2.125 2.15 2.175 2.2 2.225 2.25 2.275 2.3 2.4 2.5 2.6 2.7 2.8 2.9 3 4 5)
 # Nombre del ejecutable
 ejecutable="./ising"
 
