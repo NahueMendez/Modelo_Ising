@@ -140,11 +140,11 @@ Jis = 1.0
         !. Calculo la magnetización cuadrática media del sistema
         Mmed_2 = Mmed_2 + Mag**2
 
-        !. Calculo el calor específico
+        !. Calccv_df=cv_df.sort_values(by=['T'])ulo el calor específico
         cv = 1/(kb**2*T**2*m*n)*(Emed_2/real(i) - (Emed/real(i))**2)
 
         !. Calculo la susceptibilidad
-        sus = 1/(kb*T)*(Mmed_2/real(i) - (Mmed/real(i)**2))
+        sus = 1/(kb*T)*(Mmed_2/real(i) - (Mmed/real(i))**2)
         !.Escribo a archivo la energia y la magnetización cada 1000 pasos
         if (MOD(steps,1000) == 0) then
                 write(50,*) i,",",Emed/real(i)
