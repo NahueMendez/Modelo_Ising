@@ -6,7 +6,7 @@ program ising_mc
     integer,parameter :: n=20,m=20
     real(kind=8),parameter :: kb = 1.0
     real(kind=8) :: sistema_mu(n,m)
-    real(kind=8) :: b,T,deltaE,deltaM, Emed, E, Mag, Jis,r, Mmed, Emed_2, Mmed_2, cv, sus
+    real(kind=8) :: b,T,deltaE,deltaM, Emed, E, Mag, Jis,r, Mmed, Emed_2, Mmed_2, cv, sus, acept
 ![NO TOCAR] Inicializa generador de número random
 !------------------------------------------------------------------------------------------------------------
 
@@ -100,6 +100,9 @@ Jis = 1.0
     open(unit=100, file='CV.dat', status='unknown')
 !. Archivo para ir guardando la susceptibilidad magnética
     open(unit=110, file='chi.dat', status='unknown')
+
+!. Inicializo la cantidad de pasos aceptados en 0
+acept = 0
     !.Loop de montecarlo
     do i = 1, steps
     !.Selecciono una fila y una columna al azar
@@ -114,18 +117,20 @@ Jis = 1.0
                 ! Hago efectivo el spin flip
                 sistema_mu(x,y)=-1*sistema_mu(x,y)
                 ! Calculo la diferencia de magnetización
-                deltaM = sistema_mu(x,y)*2
+                deltaM = sistema_mu(x,y)*2.0
                 !.Calculo energía y magnetización
                 E = E+deltaE
                 Mag = Mag +deltaM
+                acept=acept+1
         else
                 r = uni()
                 if (r<exp(-deltaE/(kb*T))) then
                         sistema_mu(x,y) = -1*sistema_mu(x,y)
-                        deltaM=sistema_mu(x,y)*2
+                        deltaM=sistema_mu(x,y)*2.0
                         !.Calculo energía y magnetizacion del sistema
                         E = E + deltaE
-                        Mag = Mag + deltaM        
+                        Mag = Mag + deltaM
+                        acept=acept+1        
                 end if
         end if
         !. Calculo la energía del sistema
@@ -141,7 +146,7 @@ Jis = 1.0
         Mmed_2 = Mmed_2 + Mag**2
 
         !. Calccv_df=cv_df.sort_values(by=['T'])ulo el calor específico
-        cv = 1/(kb**2*T**2*m*n)*(Emed_2/real(i) - (Emed/real(i))**2)
+        cv = 1/((kb*T)**2*(m*n))*(Emed_2/real(i) - (Emed/real(i))**2)
 
         !. Calculo la susceptibilidad
         sus = 1/(kb*T)*(Mmed_2/real(i) - (Mmed/real(i))**2)
@@ -156,7 +161,14 @@ Jis = 1.0
         end if
 
 
+
      end do
+     
+     !. Archivo para guardar el porcentaje de aceptación de pasos.
+     open(unit=120, file='acep.dat',status='unknown')
+     write(120,*) acept
+     close(120)
+     print *, "  * Tasa de aceptación:", acept/real(N)
      print *, "  * Fin de MC Loop"
      print *, "  * Cerrando archivo energia.dat, magnetizacion.dat, calor_especifico.dat, susceptibilidad.dat"
       !.Cierro archivos de energia, magnetización, calor específico y susceptibilidad  
@@ -164,7 +176,9 @@ Jis = 1.0
       close(70)
       close(80)
       close(90)
-
+      close(100)
+      close(110)
+      
       
       !.Guardo la matriz final
       print *, "  * Escribiendo matriz final del sistema"

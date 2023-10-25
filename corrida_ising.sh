@@ -35,5 +35,7 @@ do
 
      	# Renombra el archivo susceptibilidad
     		mv ./chi.dat "./resultados/$i-chi_$temp.dat"
+	# Renombra el archivo porcentaje de aceptacion
+		mv ./acep.dat "./resultados/$i-acep_$temp.dat"
 	done
 done
